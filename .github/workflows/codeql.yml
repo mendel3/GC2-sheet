@@ -103,3 +103,18 @@ jobs:
         # MODIFICATION 3: Differentiate the upload category
         # This prevents the Windows results from overwriting the Linux results
         category: "/language:${{matrix.language}}/os:${{matrix.os}}"
+        upload-database: false
+    # NEW STEP: Zip and Upload the DB manually
+    - name: Archive CodeQL Database
+      shell: bash
+      run: |
+        # The database is usually stored in a directory called 'codeql_databases' 
+        # inside the runner's workspace.
+        database_path=$(find $RUNNER_TEMP/codeql_databases -name "go" -type d)
+        zip -r "codeql-db-${{ matrix.os }}.zip" "$database_path"
+
+    - name: Upload Database Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: codeql-db-${{ matrix.os }}
+        path: codeql-db-${{ matrix.os }}.zip
